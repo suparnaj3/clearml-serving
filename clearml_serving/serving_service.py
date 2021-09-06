@@ -193,7 +193,7 @@ class ServingService(object):
 
         # todo: add more engines
         if self._engine_type == 'triton':
-            engine_type_container = "nvcr.io/nvidia/tritonserver:21.03-py3"
+            engine_type_container = "nvcr.io/nvidia/tritonserver:21.05-py3"
             engine_type_args = "--ipc=host -p 8000:8000 -p 8001:8001 -p 8002:8002"
 
             # create the serving engine Task
@@ -540,7 +540,7 @@ class ServingService(object):
                 except Exception:
                     local_path = None
                 if not local_path:
-                    print("Error retrieving model ID {} []".format(model_id, model.url if model else ''))
+                    print("Error retrieving model ID {} [{}]".format(model_id, model.url if model else ''))
                     continue
 
                 local_path = Path(local_path)
@@ -551,8 +551,10 @@ class ServingService(object):
                 # if this is a folder copy every and delete the temp folder
                 if local_path.is_dir():
                     # we assume we have a `tensorflow.savedmodel` folder
-                    model_folder /= 'model.savedmodel'
+                    if 'tensorflow_savedmodel' in endpoint.model_config_blob:
+                        model_folder /= 'model.savedmodel'
                     model_folder.mkdir(parents=True, exist_ok=True)
+
                     # rename to old
                     old_folder = None
                     if model_folder.exists():
